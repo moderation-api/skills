@@ -7,6 +7,13 @@ timeout, fail open, raw body for webhooks.
 All SDKs read the key from `MODAPI_SECRET_KEY` and the webhook secret from
 `MODAPI_WEBHOOK_SECRET` (written by `modapi init`).
 
+In every language:
+
+- Pass the entry point's channel key as `channel`.
+- Treat any action other than `allow` and `reject` as `review`. New actions
+  can be added later; the TypeScript snippet shows the mapping.
+- `contentId` is optional: without it, save `content.id` from the response.
+
 ## TypeScript / JavaScript (`@moderation-api/sdk`)
 
 ```typescript
@@ -20,20 +27,27 @@ const moderationApi = new ModerationApi({
 
 export type ModerationDecision = "allow" | "review" | "reject";
 
+// The SDK types allow actions added later. Treat unknown ones as "review".
+function toDecision(action: string): ModerationDecision {
+  return action === "allow" || action === "reject" ? action : "review";
+}
+
 export async function moderateText(input: {
   text: string;
-  contentId: string;
+  channel: string;
+  contentId?: string;
   authorId?: string;
   conversationId?: string;
 }): Promise<ModerationDecision> {
   try {
     const result = await moderationApi.content.submit({
       content: { type: "text", text: input.text },
+      channel: input.channel,
       contentId: input.contentId,
       authorId: input.authorId,
       conversationId: input.conversationId,
     });
-    return result.recommendation.action;
+    return toDecision(result.recommendation.action);
   } catch (error) {
     // Fail open: never block users because moderation is unreachable.
     console.error("Moderation API call failed", error);
@@ -58,14 +72,24 @@ export async function POST(request: Request) {
   } catch {
     return new Response("Invalid signature", { status: 400 });
   }
-  const item = event.data?.object?.item;
+  // `event.type` narrows `event.data.object`: queue item events have `item`,
+  // author events have `author` (your user ID is `author.external_id`).
   switch (event.type) {
-    case "queue_item.rejected":
-      // hide the record with id item.id
+    case "queue_item.rejected": {
+      const item = event.data.object.item;
+      // hide the record with id item?.id in the table for item?.channel_key
       break;
-    case "queue_item.allowed":
-      // publish the record with id item.id
+    }
+    case "queue_item.allowed": {
+      const item = event.data.object.item;
+      // publish the record with id item?.id
       break;
+    }
+    case "author.blocked": {
+      const author = event.data.object.author;
+      // block the user with id author.external_id
+      break;
+    }
   }
   return new Response(null, { status: 200 });
 }

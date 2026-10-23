@@ -1,6 +1,6 @@
 ---
 name: moderation-api-setup
-description: Set up Moderation API (moderationapi.com) content moderation in an existing codebase - create the project with the modapi CLI, find where users create content, add the moderation call, act on the result, and verify webhooks. Use when the user asks to add content moderation, set up or integrate Moderation API, moderate user-generated content (messages, posts, comments, profiles, uploads), or block spam, scams or abuse in their app.
+description: Set up Moderation API (moderationapi.com) content moderation in an existing codebase - link or create the project with the modapi CLI, find where users create content, add the moderation call, act on the result, and verify webhooks. Use when the user asks to add content moderation, set up or integrate Moderation API, moderate user-generated content (messages, posts, comments, profiles, uploads), or block spam, scams or abuse in their app.
 ---
 
 # Set up Moderation API
@@ -13,9 +13,10 @@ Work in this order. Ask before each change to the user's code or account.
 
 ## 1. Check the starting point
 
-- Run `modapi --version`. If it is missing, install it:
-  `curl -fsSL https://raw.githubusercontent.com/moderation-api/cli/main/scripts/install.sh | bash`
-  (or `go install github.com/moderation-api/cli/cmd/modapi@latest`).
+- Run `modapi --version`. If it is missing or older than 0.4.0, install it:
+  `brew install moderation-api/tap/modapi` (`brew upgrade modapi` to update),
+  or `curl -fsSL https://raw.githubusercontent.com/moderation-api/cli/main/scripts/install.sh | bash`,
+  or `go install github.com/moderation-api/cli/cmd/modapi@latest`.
 - Run `modapi doctor -o json` in the project root. It tells you if a project
   key exists, if it works, if the SDK is installed, and if the env file is in
   `.gitignore`. Each check that is not `ok` has a `remedy`.
@@ -29,8 +30,12 @@ Work in this order. Ask before each change to the user's code or account.
 
 Read the codebase and write a short plan for the user:
 
-- **The platform**: what it is, who uses it, whether children use it. You pass
-  this to `init` so the project suggests the right policies.
+- **The project**: a new Moderation API project, or one the user already has.
+  `modapi projects list -o json` shows their projects (if `doctor` says they
+  are not signed in, ask them to run `modapi login` first). Ask which to use;
+  do not pick one for them.
+- **The platform**: what it is, who uses it, whether children use it. For a
+  new project you pass this to `init` so it suggests the right policies.
 - **The content entry points**: every server-side place where user content is
   created or changed, for example chat messages, posts, comments, reviews,
   profile names and bios, listing titles, image uploads. Give file and function.
@@ -40,15 +45,28 @@ Read the codebase and write a short plan for the user:
 Show the plan and wait for a "yes". Moderation policy is a product decision:
 propose, do not decide alone.
 
-## 3. Create the project
+## 3. Link or create the project
+
+To use a project the user already has:
 
 ```bash
-modapi init --name "<app name>" --domain <their domain> \
+modapi init --project "<project ID or name>" -o json
+```
+
+To create a new one:
+
+```bash
+modapi init --new --name "<app name>" --domain <their domain> \
   --context "<what the platform is and who uses it>" \
   --brief "<what to moderate: the problems and the guidelines>" \
   [--used-by-minors] -o json
 ```
 
+- Without `--project` or `--new`, init fails with `validation_error` when the
+  organization has projects, and lists them. Ask the user, then run it again
+  with their choice.
+- Linking makes a new key for the project, named after this computer and
+  directory. The project's other keys keep working.
 - `init` writes `MODAPI_SECRET_KEY` and `MODAPI_WEBHOOK_SECRET` to `.env.local`
   (Next.js) or `.env`, and adds that file to `.gitignore`. It never prints them.
 - If it fails with `authentication_error`, the user must sign in. Ask them to

@@ -11,6 +11,19 @@ content, moderate it on the server, and act on the result.
 
 Work in this order. Ask before each change to the user's code or account.
 
+## Which tool does which job
+
+Moderation API has three tools for agents. Use each one for its own job:
+
+| Tool | Job |
+|------|-----|
+| This skill | Write the integration in the user's code. |
+| `modapi` CLI | Sign in, create or link the project, write the keys, check the setup (`init`, `doctor`). |
+| MCP server (`https://mcp.moderationapi.com/mcp`) | Operate the account: review queues, authors, policies (channels), wordlists, webhooks, stats. |
+
+Do not do account work with hand-written API calls when the CLI or the MCP
+server does it. Do not ask for keys in the chat: the CLI writes them.
+
 ## 1. Check the starting point
 
 - Run `modapi --version`. If it is missing or older than 0.4.0, install it:
@@ -144,6 +157,51 @@ app the decision.
 4. Tell the user what you changed, file by file, and give them the link to
    review the suggested policies.
 
+## 8. Next: operate it with the MCP server
+
+When the integration works, tell the user what their agent can do next with
+the MCP server. Give two or three examples that fit their app, for example:
+
+- "Go through today's unresolved queue items, resolve the obvious spam, and
+  show me the ones you are unsure about."
+- "Is user 8812 a bad actor? Check their history and block them if it is a
+  pattern."
+- "These comments were flagged but are fine, and these got through. Fix the
+  policy."
+- "How did moderation go this month?"
+
+If tools named like `queue-items-list` or `channels-update` are already
+available to you, the server is connected (the Moderation API plugin includes
+it): say so and stop. If not, give the connect steps for the user's agent:
+
+- Claude Code: `claude mcp add --transport http moderation-api https://mcp.moderationapi.com/mcp`
+- Claude Desktop or claude.ai: Settings > Connectors > Add custom connector,
+  with the URL above.
+- Cursor and other clients: add a remote MCP server with the URL above.
+
+The user signs in with their Moderation API account in the browser (OAuth).
+Do not connect it without asking.
+
+## When Moderation API cannot do it
+
+If the user asks for something that Moderation API does not seem to support:
+
+1. Check first. Search the docs (`https://docs.moderationapi.com/llms.txt`),
+   the MCP tools if connected, and `modapi --help`. Only say it is not possible
+   after this check.
+2. Tell the user plainly what is not supported. Give the closest thing that
+   works today, if there is one. Never make up an endpoint, a parameter or an
+   SDK method.
+3. Offer to file a feature request with the Moderation API team. Draft it
+   with:
+   - what the user tried to do, and why (their use case)
+   - what you checked, and the workaround you used, if any
+   - the language, framework and SDK
+4. Show the draft to the user. Do not put user content, keys or personal
+   data in it unless the user adds them. Send it only after the user says yes:
+   use the MCP server's feedback tool if it has one, or else give the user the
+   draft to paste at https://moderationapi.productlane.com/request.
+
 ## Never
 
 - Print, read aloud or commit `.env` values. Refer to them by name.
@@ -152,3 +210,5 @@ app the decision.
 - Call the API from client-side code.
 - Create test users, test content or a second project in an existing app
   without asking.
+- Send a feature request or any other message to Moderation API without the
+  user's yes.

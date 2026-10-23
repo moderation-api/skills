@@ -1,0 +1,18 @@
+{
+  "name": "moderation-api",
+  "owner": {
+    "name": "Moderation API",
+    "email": "support@moderationapi.com"
+  },
+  "metadata": {
+    "description": "Official Moderation API skills for AI coding agents",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "moderation-api",
+      "source": "./",
+      "description": "Add content moderation to your app with Moderation API. A setup skill that integrates moderation into your codebase, plus the Moderation API MCP server."
+    }
+  ]
+}

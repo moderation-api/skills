@@ -1,0 +1,32 @@
+{
+  "name": "moderation-api",
+  "version": "1.0.0",
+  "description": "Add content moderation to your app with Moderation API. A setup skill that integrates moderation into your codebase, plus the Moderation API MCP server.",
+  "author": {
+    "name": "Moderation API",
+    "email": "support@moderationapi.com",
+    "url": "https://moderationapi.com"
+  },
+  "homepage": "https://docs.moderationapi.com",
+  "repository": "https://github.com/moderation-api/skills",
+  "license": "Apache-2.0",
+  "keywords": ["moderation","content-moderation","trust-and-safety","spam","abuse","ugc","mcp","moderation-api"],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Moderation API",
+    "shortDescription": "Add content moderation to your app",
+    "longDescription": "Add content moderation to your app with Moderation API. A setup skill that integrates moderation into your codebase, plus the Moderation API MCP server.",
+    "developerName": "Moderation API",
+    "category": "Coding",
+    "capabilities": ["Read", "Write", "Interactive"],
+    "websiteURL": "https://moderationapi.com",
+    "defaultPrompt": [
+      "Set up Moderation API in my app",
+      "Moderate chat messages before they are saved",
+      "Block spam and scams in user profiles"
+    ],
+    "composerIcon": "./assets/logo.svg",
+    "logo": "./assets/logo.svg"
+  }
+}

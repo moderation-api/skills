@@ -1,0 +1,17 @@
+{
+  "name": "moderation-api",
+  "displayName": "Moderation API",
+  "version": "1.0.0",
+  "description": "Add content moderation to your app with Moderation API. A setup skill that integrates moderation into your codebase, plus the Moderation API MCP server.",
+  "author": {
+    "name": "Moderation API",
+    "email": "support@moderationapi.com"
+  },
+  "homepage": "https://docs.moderationapi.com",
+  "repository": "https://github.com/moderation-api/skills",
+  "license": "Apache-2.0",
+  "logo": "assets/logo.svg",
+  "keywords": ["moderation","content-moderation","trust-and-safety","spam","abuse","ugc","mcp","moderation-api"],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}

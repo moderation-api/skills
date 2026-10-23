@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "moderation-api": {
+      "type": "http",
+      "url": "https://mcp.moderationapi.com/mcp"
+    }
+  }
+}

@@ -24,6 +24,19 @@ Moderation API has three tools for agents. Use each one for its own job:
 Do not do account work with hand-written API calls when the CLI or the MCP
 server does it. Do not ask for keys in the chat: the CLI writes them.
 
+## Use the docs
+
+This skill gives the steps and the decisions. The docs give the details, and
+they change with the API. Before you use a field, event or option that this
+skill does not show, read its page:
+
+- Index of all pages: `https://docs.moderationapi.com/llms.txt`. Add `.md` to
+  any docs URL to get the page as Markdown.
+- Exact request and response fields: the API reference pages listed there, or
+  `modapi <command> --schema` for a request body.
+- If the docs and the SDK types disagree, follow the SDK types and tell the
+  user.
+
 ## 1. Check the starting point
 
 - Run `modapi --version`. If it is missing or older than 0.4.0, install it:
@@ -33,6 +46,9 @@ server does it. Do not ask for keys in the chat: the CLI writes them.
 - Run `modapi doctor -o json` in the project root. It tells you if a project
   key exists, if it works, if the SDK is installed, and if the env file is in
   `.gitignore`. Each check that is not `ok` has a `remedy`.
+- If `doctor` says the user is not signed in, ask them to run `modapi login`
+  now (it opens their browser; `modapi login --device` over SSH). The next
+  steps need it.
 - Search the code for an existing integration (`@moderation-api/sdk`,
   `moderation_api`, `moderation-api/sdk-php`, `moderationapi.com`). If one
   exists, do not set up a second one: fill the gaps doctor reports.
@@ -44,15 +60,26 @@ server does it. Do not ask for keys in the chat: the CLI writes them.
 Read the codebase and write a short plan for the user:
 
 - **The project**: a new Moderation API project, or one the user already has.
-  `modapi projects list -o json` shows their projects (if `doctor` says they
-  are not signed in, ask them to run `modapi login` first). Ask which to use;
-  do not pick one for them.
+  `modapi projects list -o json` shows their projects. Ask which to use; do
+  not pick one for them.
+- **Shadow mode**: ask if they want to start in shadow mode. In shadow mode
+  (`DRY_RUN`) Moderation API analyzes everything, and the dashboard and review
+  queue show the real results, but every response says `allow`. The app
+  changes nothing for users while the team checks the results. Switching it
+  on later is one command, with no code change. Recommend it for an app that
+  is already live.
 - **The platform**: what it is, who uses it, whether children use it. For a
   new project you pass this to `init` so it suggests the right policies.
 - **The content entry points**: every server-side place where user content is
   created or changed, for example chat messages, posts, comments, reviews,
   profile names and bios, listing titles, image uploads. Give file and function.
-- **For each entry point**: what to do on `reject` and `review` (see step 5).
+- **Channels**: one channel for each kind of content (for example `messages`,
+  `posts`, `profiles`, `reviews`). Each channel has its own policies, and
+  webhooks tell you the channel, so the app knows which table to update.
+- **For each entry point**: its channel, and what to do on `reject` and
+  `review` (see step 5).
+- **Content not saved yet**: if an entry point moderates before the record
+  exists, choose one way (see step 4) and say which.
 - **Webhooks**: whether the app needs to act when a moderator decides later.
 
 Show the plan and wait for a "yes". Moderation policy is a product decision:
@@ -89,6 +116,16 @@ modapi init --new --name "<app name>" --domain <their domain> \
 - Run `--dry-run -o json` first if you want to see what init will do.
 - Add `--install` to install the SDK, or run the `install_command` from the
   result. There is no Go SDK: in Go, call the REST API.
+- `init --dry-run` only previews what `init` does. It is not shadow mode.
+
+Then set up what the plan agreed:
+
+- **Channels**: `modapi channels list --project-id <id> -o json` shows the
+  existing ones. Add one with
+  `modapi channels create --project-id <id> --name "Messages" --key messages --content-type message -o json`.
+- **Shadow mode**: `modapi projects update <id> --global-flagging-mode DRY_RUN`
+  for the whole project, or `modapi channels update <id> --flagging-mode DRY_RUN`
+  for one channel.
 
 ## 4. Add the moderation call
 
@@ -101,11 +138,42 @@ Send with every call:
 - `content`: `{type: "text", text}`, `{type: "image", url}`, or
   `{type: "object", data: {...}}` for content with several fields (a listing
   with title, description and photos).
-- `contentId`: the ID of the record in the app's database. Webhooks send it back.
+- `channel`: the channel key for this entry point.
+- `contentId`: the ID of the record in the app's database. Webhooks send it
+  back as `item.id`. Sending the same `contentId` again (after an edit)
+  updates the item instead of adding a second one.
 - `authorId`: the user's ID. It turns on author trust levels and blocking.
 - `conversationId`: the chat, thread or room, when there is one. It gives the
   AI the context of the conversation.
-- `metadata`: optional small facts that help reviewers, for example the surface.
+- `metadata`: optional small facts that help reviewers.
+
+**Content not saved yet.** Choose one way per entry point:
+
+- Moderate first (recommended when `reject` must stop the content): leave out
+  `contentId`. The API makes one and returns it as `content.id`. Save it on
+  the record, so webhooks can find the record later.
+- Save first, then moderate with the new ID, and delete or hide the record on
+  `reject`. Simpler IDs, but rejected content exists for a moment.
+
+**The app's own spam checks.** If the app already has a verdict (IP ban,
+CAPTCHA fail, fraud score), send it as `clientAction`, for example
+`{action: "review", behavior: "escalate", source: "fraud-score", reason: "..."}`.
+`escalate` only makes the result stricter; `override` replaces it. Do not run
+the two checks side by side: with `clientAction`, moderators see the app's
+verdict in the review queue.
+
+**Authors.** Moderators work better when they know who wrote the content.
+When a user signs up or changes their profile, send their name, email,
+profile picture and profile link (`external_link`) with `authors.create` or
+`authors.update` (`external_id` = the `authorId` you send). See
+https://docs.moderationapi.com/users/updating-authors.md. For more context
+in the review queue (plan, admin links), the team can set up
+[custom data](https://docs.moderationapi.com/users/custom-data.md) later.
+
+**User reports.** If the app lets users report content, send each report
+with `actions.execute` and a report action, so it goes to the review queue.
+See https://docs.moderationapi.com/guides/user-flagged-content.md. Propose it
+in the plan; do not build it unasked.
 
 ## 5. Act on the result
 
@@ -117,8 +185,23 @@ Read `recommendation.action`:
 | `review` | Save it, and hide it or publish it, as agreed in the plan. It is in the review queue for a moderator. |
 | `reject` | Do not publish. Show the user a short, neutral message. |
 
-Also read `author.block` and `author.trust_level`: a blocked author's content
-can be refused without a call.
+Treat any other value as `review`: the SDK types allow values that may be
+added later.
+
+Also read:
+
+- `content.modified`: when it is not `null`, the API masked part of the
+  content (for example contact details or URLs). Save and show this version,
+  not the original. For object content it holds the fields.
+- `policies[].flagged_fields` (object content): the keys of the fields that a
+  policy flagged. Hold back only those fields, not the whole update, when the
+  plan says so.
+- `author.block` and `author.trust_level`: a blocked author's content can be
+  refused without a call.
+
+In shadow mode the action is always `allow` and `reason_codes` has `dry_run`.
+Keep the full handling code anyway, so switching shadow mode off needs no
+code change.
 
 Rules:
 
@@ -138,12 +221,19 @@ app the decision.
    against the **raw** request body with the SDK (`validateWebhook` in
    TypeScript, `construct_event` in Python and Ruby, `constructEvent` in PHP).
    They read `MODAPI_WEBHOOK_SECRET`. See the snippets file.
-2. Handle `event.type`. The event's `data.object.item.id` is the `contentId`
-   you sent, and `item.author_id` is your user ID:
+2. Handle `event.type`. In `queue_item.*` events, `data.object.item` has
+   `id` (the `contentId` you sent, or the generated `content.id`),
+   `author_id` (your user ID) and `channel_key` (route on it to find the
+   right table):
    - `queue_item.rejected`: hide or delete the content.
    - `queue_item.allowed`: publish content you held for review.
-   - `author.blocked` / `author.suspended` / `author.unblocked`: update the user.
    - `queue_item.action`: a custom action; `data.object.key` names it.
+   - `author.blocked` / `author.suspended` / `author.unblocked`: update the
+     user. These events have no `item`: your user ID is
+     `data.object.author.external_id`, and `author.block.until` is a time in
+     **milliseconds** (or `null`).
+
+   The full payloads are at https://docs.moderationapi.com/actions/webhooks.md.
 3. Register the URL once it is public:
    `modapi webhooks create --name "App" --url https://<host>/webhooks/moderation -e QUEUE_ITEM_REJECTED -e QUEUE_ITEM_ALLOWED -e AUTHOR_BLOCKED`
    For local testing, use a tunnel (for example `ngrok http 3000`).
@@ -156,6 +246,9 @@ app the decision.
    request in the dashboard (the link is in the `init` result).
 4. Tell the user what you changed, file by file, and give them the link to
    review the suggested policies.
+5. In shadow mode, tell the user how to go live when they trust the results:
+   `modapi projects update <id> --global-flagging-mode ACTIVE` (or
+   `modapi channels update <id> --flagging-mode ACTIVE` per channel).
 
 ## 8. Next: operate it with the MCP server
 

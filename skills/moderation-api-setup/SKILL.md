@@ -247,9 +247,15 @@ the user why it does not apply:
       The recommendation includes the team's rules, thresholds and review
       routing; `flagged` only says that a policy matched.
 - [ ] `review` has its own handling, not the same as `allow` or `reject`.
+- [ ] Every place where users create content is covered, not only text:
+      images, profile names and bios, display names, uploads.
+- [ ] Blocked authors are handled: the app reads `author.block`, or acts on
+      the `author.blocked` webhook.
 - [ ] Webhooks are set up when content can be held for review, or when the
       team takes actions in the dashboard (block an author, reject later).
       Without them, the app never learns the decision.
+- [ ] The webhook route checks the signature on the raw body, and handles
+      the same event twice without harm (webhooks are retried).
 - [ ] Every call sends `authorId`, and `conversationId` where content is part
       of a chat or thread. They turn on author history and context.
 - [ ] Content that users can edit sends a stable `contentId`, and edits are

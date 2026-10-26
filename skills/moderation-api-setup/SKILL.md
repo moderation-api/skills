@@ -52,6 +52,17 @@ skill does not show, read its page:
 - Search the code for an existing integration (`@moderation-api/sdk`,
   `moderation_api`, `moderation-api/sdk-php`, `moderationapi.com`). If one
   exists, do not set up a second one: fill the gaps doctor reports.
+- Check if a ready-made integration fits better than code. Tell the user and
+  ask before you write code:
+  - **WordPress site**: install the
+    [Moderation API plugin](https://wordpress.org/plugins/moderation-api-automated-content-moderation/),
+    then connect the site under **Integrate → Platforms** in the dashboard.
+  - **Discord server** or **Slack workspace** that the user wants moderated:
+    connect it under **Integrate → Platforms** in the dashboard. No code.
+  - Other platforms: see https://moderationapi.com/integrations.
+
+  A custom app that has its own Discord or Slack bot code is not this case:
+  add the moderation call to the bot's code.
 - If the app already uses another moderation service, stop and ask the user
   whether to replace it or run both.
 
@@ -239,6 +250,32 @@ app the decision.
    For local testing, use a tunnel (for example `ngrok http 3000`).
 
 ## 7. Verify
+
+First check the code against these common mistakes. Fix each one, or tell
+the user why it does not apply:
+
+- [ ] The code acts on `recommendation.action`, not on `evaluation.flagged`.
+      The recommendation includes the team's rules, thresholds and review
+      routing; `flagged` only says that a policy matched.
+- [ ] `review` has its own handling, not the same as `allow` or `reject`.
+- [ ] Every place where users create content is covered, not only text:
+      images, profile names and bios, display names, uploads.
+- [ ] Blocked authors are handled: the app reads `author.block`, or acts on
+      the `author.blocked` webhook.
+- [ ] Webhooks are set up when content can be held for review, or when the
+      team takes actions in the dashboard (block an author, reject later).
+      Without them, the app never learns the decision.
+- [ ] The webhook route checks the signature on the raw body, and handles
+      the same event twice without harm (webhooks are retried).
+- [ ] Every call sends `authorId`, and `conversationId` where content is part
+      of a chat or thread. They turn on author history and context.
+- [ ] Content that users can edit sends a stable `contentId`, and edits are
+      moderated again with the same `contentId`.
+- [ ] Each kind of content uses its own `channel`.
+- [ ] Calls run on the server only, with a short timeout, and fail open.
+- [ ] No key is in the code, in a committed file, or in the chat.
+
+Then:
 
 1. Run `modapi doctor`. Fix every `fail`.
 2. Send one test: `modapi content submit --content '{"type":"text","text":"Buy followers now, DM me on WhatsApp +1 555 0100"}' --jq '.recommendation.action'`

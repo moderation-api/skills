@@ -240,6 +240,26 @@ app the decision.
 
 ## 7. Verify
 
+First check the code against these common mistakes. Fix each one, or tell
+the user why it does not apply:
+
+- [ ] The code acts on `recommendation.action`, not on `evaluation.flagged`.
+      The recommendation includes the team's rules, thresholds and review
+      routing; `flagged` only says that a policy matched.
+- [ ] `review` has its own handling, not the same as `allow` or `reject`.
+- [ ] Webhooks are set up when content can be held for review, or when the
+      team takes actions in the dashboard (block an author, reject later).
+      Without them, the app never learns the decision.
+- [ ] Every call sends `authorId`, and `conversationId` where content is part
+      of a chat or thread. They turn on author history and context.
+- [ ] Content that users can edit sends a stable `contentId`, and edits are
+      moderated again with the same `contentId`.
+- [ ] Each kind of content uses its own `channel`.
+- [ ] Calls run on the server only, with a short timeout, and fail open.
+- [ ] No key is in the code, in a committed file, or in the chat.
+
+Then:
+
 1. Run `modapi doctor`. Fix every `fail`.
 2. Send one test: `modapi content submit --content '{"type":"text","text":"Buy followers now, DM me on WhatsApp +1 555 0100"}' --jq '.recommendation.action'`
 3. Start the app and create content through one real entry point. Confirm the

@@ -52,6 +52,17 @@ skill does not show, read its page:
 - Search the code for an existing integration (`@moderation-api/sdk`,
   `moderation_api`, `moderation-api/sdk-php`, `moderationapi.com`). If one
   exists, do not set up a second one: fill the gaps doctor reports.
+- Check if a ready-made integration fits better than code. Tell the user and
+  ask before you write code:
+  - **WordPress site**: install the
+    [Moderation API plugin](https://wordpress.org/plugins/moderation-api-automated-content-moderation/),
+    then connect the site under **Integrate → Platforms** in the dashboard.
+  - **Discord server** or **Slack workspace** that the user wants moderated:
+    connect it under **Integrate → Platforms** in the dashboard. No code.
+  - Other platforms: see https://moderationapi.com/integrations.
+
+  A custom app that has its own Discord or Slack bot code is not this case:
+  add the moderation call to the bot's code.
 - If the app already uses another moderation service, stop and ask the user
   whether to replace it or run both.
 

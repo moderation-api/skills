@@ -186,6 +186,14 @@ with `actions.execute` and a report action, so it goes to the review queue.
 See https://docs.moderationapi.com/guides/user-flagged-content.md. Propose it
 in the plan; do not build it unasked.
 
+**Reviews in the app's own tool.** If moderators decide in the app's own admin
+tool instead of the review queue, send each decision with `content.allow` or
+`content.reject` and `moderator` (the reviewer's email or user ID in the
+organization). Without `moderator`, the decision counts as automated: it is
+not attributed to anyone and does not become a casebook case. An unknown
+`moderator` is a 400 error. See
+https://docs.moderationapi.com/actions/content-actions.md.
+
 ## 5. Act on the result
 
 Read `recommendation.action`:

@@ -14,6 +14,7 @@
   "supportUrl": "https://moderationapi.com/support",
   "privacyPolicyUrl": "https://moderationapi.com/privacy-policy",
   "termsOfServiceUrl": "https://moderationapi.com/terms-of-service",
+  "icon": "./assets/logo.svg",
   "license": "Apache-2.0",
   "keywords": [
     "moderation",

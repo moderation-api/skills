@@ -283,9 +283,9 @@ route from CSRF verification.
 
 ## Go (no SDK)
 
-POST `https://moderationapi.com/api/v1/moderate` with
-`Authorization: Bearer $MODAPI_SECRET_KEY` and the same JSON body
-(`content`, `contentId`, `authorId`, `conversationId`). Use an
+Call the submit-content endpoint from the API reference with the same JSON
+body (`content`, `contentId`, `authorId`, `conversationId`). Load the secret
+key the same way as the other snippets and send it as a Bearer token. Use an
 `http.Client{Timeout: 5 * time.Second}` and fail open. Verify webhooks with
 HMAC-SHA256 over the raw body, hex-encoded, compared in constant time with the
 `modapi-signature` header.

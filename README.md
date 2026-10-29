@@ -33,7 +33,7 @@ The plugin has no hooks and no local code. It has one skill and one remote MCP s
 
 - **MCP server:** `https://mcp.moderationapi.com/mcp`, run by Moderation API. You sign in with your Moderation API account (OAuth). Tool calls go to the Moderation API for your organization.
 - **The skill** tells the agent to do these things, and to ask you before each change to your code or account:
-  - Install the `modapi` CLI if it is missing: with Homebrew (`moderation-api/tap/modapi`), the install script at `https://raw.githubusercontent.com/moderation-api/cli/main/scripts/install.sh`, or `go install`.
+  - Install the `modapi` CLI if it is missing: with Homebrew (`moderation-api/tap/modapi`) or `go install`, or by asking you to download a binary from the [CLI releases](https://github.com/moderation-api/cli/releases).
   - Run `modapi` commands (`doctor`, `init`, `webhooks create`, `content submit`). They call `https://api.moderationapi.com`. `modapi login` opens your browser to sign in. `init` writes your project keys to `.env.local` or `.env` and adds that file to `.gitignore`.
   - Install the Moderation API SDK for your language with your package manager.
   - Read the [Moderation API docs](https://docs.moderationapi.com).

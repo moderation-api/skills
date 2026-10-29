@@ -41,8 +41,9 @@ skill does not show, read its page:
 
 - Run `modapi --version`. If it is missing or older than 0.4.0, install it:
   `brew install moderation-api/tap/modapi` (`brew upgrade modapi` to update),
-  or `curl -fsSL https://raw.githubusercontent.com/moderation-api/cli/main/scripts/install.sh | bash`,
   or `go install github.com/moderation-api/cli/cmd/modapi@latest`.
+  Without Homebrew or Go, ask the user to download the binary for their system
+  from https://github.com/moderation-api/cli/releases and put it on their PATH.
 - Run `modapi doctor -o json` in the project root. It tells you if a project
   key exists, if it works, if the SDK is installed, and if the env file is in
   `.gitignore`. Each check that is not `ok` has a `remedy`.

@@ -6,7 +6,8 @@ timeout, fail open, raw body for webhooks.
 
 `modapi init` writes `MODAPI_SECRET_KEY` and `MODAPI_WEBHOOK_SECRET` to the env
 file. Every SDK reads both from the environment, so the snippets pass neither:
-do not read the key in code.
+do not read the key in code. Ruby needs `moderation_api` 3.4.0 or later and PHP
+needs `moderation-api/sdk-php` 1.4.0 or later for this; upgrade older versions.
 
 In every language:
 

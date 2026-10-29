@@ -11,7 +11,7 @@ In every language:
 
 - Pass the entry point's channel key as `channel`.
 - Treat any action other than `allow` and `reject` as `review`. New actions
-  can be added later; the TypeScript snippet shows the mapping.
+  can be added later; each snippet maps them in code.
 - `contentId` is optional: without it, save `content.id` from the response.
 
 ## TypeScript / JavaScript (`@moderation-api/sdk`)
@@ -105,24 +105,37 @@ Next.js Pages Router: `export const config = { api: { bodyParser: false } }`.
 # moderation.py (server only)
 import logging
 import os
+from typing import Literal
 
 from moderation_api import ModerationAPI
 
 client = ModerationAPI(secret_key=os.environ.get("MODAPI_SECRET_KEY", ""), timeout_ms=5_000)
 log = logging.getLogger(__name__)
 
+ModerationDecision = Literal["allow", "review", "reject"]
 
-def moderate_text(text: str, content_id: str, author_id: str | None = None,
-                  conversation_id: str | None = None) -> str:
-    """Return "allow", "review" or "reject"."""
+
+def to_decision(action: str) -> ModerationDecision:
+    """The SDK accepts actions added later. Treat unknown ones as "review"."""
+    if action == "allow":
+        return "allow"
+    if action == "reject":
+        return "reject"
+    return "review"
+
+
+def moderate_text(text: str, channel: str, content_id: str | None = None,
+                  author_id: str | None = None,
+                  conversation_id: str | None = None) -> ModerationDecision:
     try:
         res = client.content.submit(
             content={"type": "text", "text": text},
+            channel=channel,
             content_id=content_id,
             author_id=author_id,
             conversation_id=conversation_id,
         )
-        return res.recommendation.action
+        return to_decision(res.recommendation.action)
     except Exception:  # fail open
         log.exception("Moderation API call failed")
         return "allow"
@@ -159,17 +172,25 @@ module Moderation
     timeout_ms: 5_000
   )
 
+  # The SDK returns the action as an enum that accepts actions added later.
+  # Treat unknown ones as "review".
+  def self.to_decision(action)
+    value = action.to_s
+    %w[allow reject].include?(value) ? value : "review"
+  end
+
   # Returns "allow", "review" or "reject".
-  def self.moderate_text(text:, content_id:, author_id: nil, conversation_id: nil)
+  def self.moderate_text(text:, channel:, content_id: nil, author_id: nil, conversation_id: nil)
     res = CLIENT.content.submit(
       body: Ops::SubmitContentRequestBody.new(
         content: Ops::TextRequest.new(type: "text", text: text),
+        channel: channel,
         content_id: content_id,
         author_id: author_id,
         conversation_id: conversation_id
       )
     )
-    res.object&.recommendation&.action || "allow"
+    to_decision(res.object&.recommendation&.action)
   rescue StandardError => e # fail open
     Rails.logger.error("Moderation API call failed: #{e.message}")
     "allow"
@@ -199,8 +220,19 @@ end
 ```php
 use ModerationApi\ModerationApi;
 use ModerationApi\Models\Operations;
+use ModerationApi\Models\Operations\ActionResponse;
 
-function moderateText(string $text, string $contentId, ?string $authorId = null): string
+/** @return 'allow'|'review'|'reject' */
+function toDecision(?ActionResponse $action): string
+{
+    return match ($action) {
+        ActionResponse::Allow, ActionResponse::Reject => $action->value,
+        default => 'review',
+    };
+}
+
+/** @return 'allow'|'review'|'reject' */
+function moderateText(string $text, string $channel, ?string $contentId = null, ?string $authorId = null): string
 {
     static $sdk = null;
     $sdk ??= ModerationApi::builder()
@@ -211,10 +243,16 @@ function moderateText(string $text, string $contentId, ?string $authorId = null)
     try {
         $response = $sdk->content->submit(body: new Operations\SubmitContentRequestBody(
             content: new Operations\TextRequest(text: $text),
+            channel: $channel,
             contentId: $contentId,
             authorId: $authorId,
         ));
-        return $response->object?->recommendation?->action ?? 'allow';
+        return toDecision($response->object?->recommendation->action);
+    } catch (\Speakeasy\Serializer\Exception\Exception $e) {
+        // The API answered, but this SDK version could not read the response.
+        // Its action enum is closed, so an action added later ends up here.
+        error_log('Moderation API response not readable: ' . $e->getMessage());
+        return 'review';
     } catch (\Throwable $e) { // fail open
         error_log('Moderation API call failed: ' . $e->getMessage());
         return 'allow';

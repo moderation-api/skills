@@ -1,6 +1,17 @@
 ---
 name: moderation-api-setup
 description: Set up Moderation API (moderationapi.com) content moderation in an existing codebase - link or create the project with the modapi CLI, find where users create content, add the moderation call, act on the result, and verify webhooks. Use when the user asks to add content moderation, set up or integrate Moderation API, moderate user-generated content (messages, posts, comments, profiles, uploads), or block spam, scams or abuse in their app.
+metadata:
+  openclaw:
+    emoji: "🛡️"
+    homepage: https://docs.moderationapi.com/ai/skill
+    envVars:
+      - name: MODAPI_SECRET_KEY
+        required: false
+        description: Project API key. `modapi init` writes it to the app's env file; the SDKs read it from there.
+      - name: MODAPI_WEBHOOK_SECRET
+        required: false
+        description: Webhook signing secret. `modapi init` writes it to the app's env file; the SDKs read it to verify webhooks.
 ---
 
 # Set up Moderation API

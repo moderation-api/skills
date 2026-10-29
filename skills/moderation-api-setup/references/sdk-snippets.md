@@ -4,8 +4,9 @@ A moderation helper and a webhook route for each official SDK. Adapt names
 and file paths to the codebase; keep the behavior: server-side only, short
 timeout, fail open, raw body for webhooks.
 
-All SDKs read the key from `MODAPI_SECRET_KEY` and the webhook secret from
-`MODAPI_WEBHOOK_SECRET` (written by `modapi init`).
+`modapi init` writes `MODAPI_SECRET_KEY` and `MODAPI_WEBHOOK_SECRET` to the env
+file. Every SDK reads both from the environment, so the snippets pass neither:
+do not read the key in code.
 
 In every language:
 
@@ -20,10 +21,7 @@ In every language:
 // lib/moderation.ts (server only)
 import { ModerationApi } from "@moderation-api/sdk";
 
-const moderationApi = new ModerationApi({
-  secretKey: process.env.MODAPI_SECRET_KEY ?? "",
-  timeoutMs: 5_000,
-});
+const moderationApi = new ModerationApi({ timeoutMs: 5_000 }); // reads MODAPI_SECRET_KEY
 
 export type ModerationDecision = "allow" | "review" | "reject";
 
@@ -104,12 +102,11 @@ Next.js Pages Router: `export const config = { api: { bodyParser: false } }`.
 ```python
 # moderation.py (server only)
 import logging
-import os
 from typing import Literal
 
 from moderation_api import ModerationAPI
 
-client = ModerationAPI(secret_key=os.environ.get("MODAPI_SECRET_KEY", ""), timeout_ms=5_000)
+client = ModerationAPI(timeout_ms=5_000)  # reads MODAPI_SECRET_KEY
 log = logging.getLogger(__name__)
 
 ModerationDecision = Literal["allow", "review", "reject"]
@@ -167,10 +164,7 @@ require "moderation_api"
 
 module Moderation
   Ops = ::ModerationApi::Models::Operations
-  CLIENT = ::ModerationApi::ModerationApi.new(
-    secret_key: ENV.fetch("MODAPI_SECRET_KEY", ""),
-    timeout_ms: 5_000
-  )
+  CLIENT = ::ModerationApi::ModerationApi.new(timeout_ms: 5_000) # reads MODAPI_SECRET_KEY
 
   # The SDK returns the action as an enum that accepts actions added later.
   # Treat unknown ones as "review".
@@ -235,8 +229,7 @@ function toDecision(?ActionResponse $action): string
 function moderateText(string $text, string $channel, ?string $contentId = null, ?string $authorId = null): string
 {
     static $sdk = null;
-    $sdk ??= ModerationApi::builder()
-        ->setSecurity(getenv('MODAPI_SECRET_KEY') ?: '')
+    $sdk ??= ModerationApi::builder() // reads MODAPI_SECRET_KEY
         ->setClient(new \GuzzleHttp\Client(['timeout' => 5]))
         ->build();
 

@@ -36,7 +36,7 @@ The plugin has no hooks and no local code. It has one skill and one remote MCP s
   - Install the `modapi` CLI if it is missing: with Homebrew (`moderation-api/tap/modapi`), the install script at `https://raw.githubusercontent.com/moderation-api/cli/main/scripts/install.sh`, or `go install`.
   - Run `modapi` commands (`doctor`, `init`, `webhooks create`, `content submit`). They call `https://api.moderationapi.com`. `modapi login` opens your browser to sign in. `init` writes your project keys to `.env.local` or `.env` and adds that file to `.gitignore`.
   - Install the Moderation API SDK for your language with your package manager.
-  - Read the docs at `https://docs.moderationapi.com`.
+  - Read the [Moderation API docs](https://docs.moderationapi.com).
   - If Moderation API cannot do what you ask, draft a feature request and show it to you. Only with your yes does it send the request through the MCP server or give you a link to `https://moderationapi.productlane.com/request`.
 - The skill never asks you to paste API keys into the chat, and never prints or commits them.
 

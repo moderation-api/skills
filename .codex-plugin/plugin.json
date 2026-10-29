@@ -1,6 +1,6 @@
 {
   "name": "moderation-api",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Add content moderation to your app with Moderation API. A setup skill that integrates moderation into your codebase, plus the Moderation API MCP server.",
   "author": {
     "name": "Moderation API",
@@ -10,17 +10,33 @@
   "homepage": "https://moderationapi.com",
   "repository": "https://github.com/moderation-api/skills",
   "license": "Apache-2.0",
-  "keywords": ["moderation","content-moderation","trust-and-safety","spam","abuse","ugc","mcp","moderation-api"],
+  "keywords": [
+    "moderation",
+    "content-moderation",
+    "trust-and-safety",
+    "spam",
+    "abuse",
+    "ugc",
+    "mcp",
+    "moderation-api"
+  ],
   "skills": "./skills/",
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Moderation API",
-    "shortDescription": "Add content moderation to your app",
-    "longDescription": "Add content moderation to your app with Moderation API. A setup skill that integrates moderation into your codebase, plus the Moderation API MCP server.",
+    "shortDescription": "Moderate content in your app",
+    "longDescription": "Add content moderation to your app and run it from your agent.\n\nThe setup skill integrates Moderation API into your codebase: it creates or links a project with the modapi CLI, finds where users create content (messages, posts, comments, profiles, uploads), adds the moderation call, acts on the result (allow, review or reject) and verifies webhooks.\n\nThe Moderation API MCP server lets your agent operate your account: triage the review queue, investigate and block authors, tune policies and wordlists from real examples, respond to spam raids and report on how moderation is going.\n\nYou sign in with your Moderation API account over OAuth. The agent can reach the projects you can reach, and every change it makes is visible in the dashboard.",
     "developerName": "Moderation API",
     "category": "Coding",
-    "capabilities": ["Read", "Write", "Interactive"],
+    "capabilities": [
+      "Read",
+      "Write",
+      "Interactive"
+    ],
     "websiteURL": "https://moderationapi.com",
+    "supportURL": "https://moderationapi.com/support",
+    "privacyPolicyURL": "https://moderationapi.com/privacy-policy",
+    "termsOfServiceURL": "https://moderationapi.com/terms-of-service",
     "defaultPrompt": [
       "Set up Moderation API in my app",
       "Moderate chat messages before they are saved",

@@ -1,7 +1,7 @@
 {
   "name": "moderation-api",
   "displayName": "Moderation API",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Add content moderation to your app with Moderation API. A setup skill that integrates moderation into your codebase, plus the Moderation API MCP server.",
   "author": {
     "name": "Moderation API",

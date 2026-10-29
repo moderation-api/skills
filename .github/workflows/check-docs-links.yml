@@ -1,0 +1,24 @@
+name: Check docs links
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  # Docs pages can move without a change here, so also check daily.
+  schedule:
+    - cron: "23 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-docs-links:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: node scripts/check-docs-links.mjs

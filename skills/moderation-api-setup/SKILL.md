@@ -327,6 +327,8 @@ it): say so and stop. If not, give the connect steps for the user's agent:
 - Claude Code: `claude mcp add --transport http moderation-api https://mcp.moderationapi.com/mcp`
 - Claude Desktop or claude.ai: Settings > Connectors > Add custom connector,
   with the URL above.
+- Codex or ChatGPT: install the Moderation API plugin from the plugin
+  directory. It includes the server.
 - Cursor and other clients: add a remote MCP server with the URL above.
 
 The user signs in with their Moderation API account in the browser (OAuth).

@@ -1,6 +1,6 @@
 {
   "name": "moderation-api",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "description": "Add content moderation to your app with Moderation API. A setup skill that integrates moderation into your codebase, plus the Moderation API MCP server.",
   "author": {
     "name": "Moderation API",
@@ -25,9 +25,9 @@
   "interface": {
     "displayName": "Moderation API",
     "shortDescription": "Moderate content in your app",
-    "longDescription": "Add content moderation to your app and run it from your agent.\n\nThe setup skill integrates Moderation API into your codebase: it creates or links a project with the modapi CLI, finds where users create content (messages, posts, comments, profiles, uploads), adds the moderation call, acts on the result (allow, review or reject) and verifies webhooks.\n\nThe Moderation API MCP server lets your agent operate your account: triage the review queue, investigate and block authors, tune policies and wordlists from real examples, respond to spam raids and report on how moderation is going.\n\nYou sign in with your Moderation API account over OAuth. The agent can reach the projects you can reach, and every change it makes is visible in the dashboard.",
+    "longDescription": "Run content moderation for your platform from the conversation, and add it to your app's code.\n\nConnect your Moderation API account to triage the review queue, investigate and block authors, tune policies and wordlists from real examples, check how a message would be moderated, and report on how moderation is going.\n\nIn Codex, the setup skill also integrates Moderation API into your codebase: it creates or links a project with the modapi CLI, finds where users create content (messages, posts, comments, profiles, uploads), adds the moderation call, acts on the result (allow, review or reject) and verifies webhooks.\n\nYou sign in with your Moderation API account over OAuth. The plugin can reach only the projects your account can reach, it asks before changes such as rejecting content or blocking an author, and every change it makes is visible in the Moderation API dashboard.\n\nRequires a Moderation API account. You can create one for free at moderationapi.com.",
     "developerName": "Moderation API",
-    "category": "Coding",
+    "category": "Developer Tools",
     "capabilities": [
       "Read",
       "Write",
@@ -38,11 +38,71 @@
     "privacyPolicyURL": "https://moderationapi.com/privacy-policy",
     "termsOfServiceURL": "https://moderationapi.com/terms-of-service",
     "defaultPrompt": [
-      "Set up Moderation API in my app",
-      "Moderate chat messages before they are saved",
-      "Block spam and scams in user profiles"
+      "Triage the unresolved items in my review queue",
+      "How did moderation go this month?",
+      "Set up Moderation API in my app"
     ],
     "composerIcon": "./assets/logo.svg",
     "logo": "./assets/logo.svg"
+  },
+  "extensions": {
+    "com.openai": {
+      "review": {
+        "test_cases": {
+          "positive": [
+            {
+              "description": "Check how a piece of content would be moderated",
+              "prompt": "Check whether this message would get through my moderation: \"Buy followers now, DM me on WhatsApp +1 555 0100\"",
+              "tools_triggered": "content-submit",
+              "expected_behavior": "Submits the text to the demo project and reports the recommendation (reject or review), the policies that matched and why. Explains that the result follows the project's own policies."
+            },
+            {
+              "description": "Triage the review queue, with confirmation before acting",
+              "prompt": "Go through the unresolved items in my review queue. Tell me which ones are obvious spam and which you're unsure about.",
+              "tools_triggered": "queue-list, queue-items-list",
+              "expected_behavior": "Lists the unresolved items in the demo project's queue, groups them into likely spam and unclear cases with the reason for each, and asks before rejecting or resolving anything. On the user's yes, it calls content-reject or queue-items-resolve for the confirmed items only."
+            },
+            {
+              "description": "Investigate an author",
+              "prompt": "Is the author demo-spammer-01 a bad actor? Check their history.",
+              "tools_triggered": "authors-retrieve, queue-items-list",
+              "expected_behavior": "Returns the author's trust level, status and flagged content history from the demo project and gives a short assessment. Offers to block or suspend the author but does not do it without the user's confirmation."
+            },
+            {
+              "description": "Tune a wordlist",
+              "prompt": "Add \"cheap followers\" and \"whatsapp me\" to my Spam phrases wordlist.",
+              "tools_triggered": "wordlist-list, wordlist-words-add",
+              "expected_behavior": "Finds the Spam phrases wordlist in the demo project, adds the two phrases, and confirms the wordlist now contains them."
+            },
+            {
+              "description": "Report on moderation activity",
+              "prompt": "How did moderation go over the last 30 days?",
+              "tools_triggered": "analytics-summary, analytics-volumes, analytics-policies",
+              "expected_behavior": "Summarizes content volume, how much was flagged, allowed, reviewed and rejected, and the top policies that matched, using the demo project's data for the last 30 days. Does not invent numbers that the tools did not return."
+            }
+          ],
+          "negative": [
+            {
+              "description": "Content on a platform that is not connected to the user's Moderation API account",
+              "prompt": "Go and delete the rude comments under my friend's latest Instagram post."
+            },
+            {
+              "description": "Request for personal information about an author that the tools do not hold and should not be looked up",
+              "prompt": "Find the home address and phone number of the person who wrote the last flagged comment."
+            },
+            {
+              "description": "Request unrelated to content moderation",
+              "prompt": "What's the weather in Copenhagen tomorrow?"
+            }
+          ]
+        },
+        "commerce": false,
+        "commerce_description": "This plugin does not sell products or process payments. Moderation API plans are managed on moderationapi.com."
+      },
+      "publication": {
+        "countries": [],
+        "release_notes": "First release in the OpenAI plugin directory: the Moderation API MCP server (review queue, authors, policies, wordlists, webhooks, analytics) and the moderation-api-setup skill for adding moderation to a codebase."
+      }
+    }
   }
 }

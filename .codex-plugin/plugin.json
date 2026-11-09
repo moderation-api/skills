@@ -1,6 +1,6 @@
 {
   "name": "moderation-api",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Add content moderation to your app with Moderation API. A setup skill that integrates moderation into your codebase, plus the Moderation API MCP server.",
   "author": {
     "name": "Moderation API",
@@ -25,7 +25,7 @@
   "interface": {
     "displayName": "Moderation API",
     "shortDescription": "Moderate content in your app",
-    "longDescription": "Run content moderation for your platform from the conversation, and add it to your app's code.\n\nConnect your Moderation API account to triage the review queue, investigate and block authors, tune policies and wordlists from real examples, check how a message would be moderated, and report on how moderation is going.\n\nIn Codex, the setup skill also integrates Moderation API into your codebase: it creates or links a project with the modapi CLI, finds where users create content (messages, posts, comments, profiles, uploads), adds the moderation call, acts on the result (allow, review or reject) and verifies webhooks.\n\nYou sign in with your Moderation API account over OAuth. The plugin can reach only the projects your account can reach, it asks before changes such as rejecting content or blocking an author, and every change it makes is visible in the Moderation API dashboard.\n\nRequires a Moderation API account. You can create one for free at moderationapi.com.",
+    "longDescription": "Run content moderation for your platform from the conversation, and add it to your app's code.\n\nConnect your Moderation API account to triage the review queue, investigate and block authors, tune policies and wordlists from real examples, check how a message would be moderated, and report on how moderation is going.\n\nIn Codex, the setup skill also integrates Moderation API into your codebase: it creates or links a project with the modapi CLI, finds where users create content (messages, posts, comments, profiles, uploads), adds the moderation call, acts on the result (allow, review or reject) and verifies webhooks.\n\nYou sign in with your Moderation API account over OAuth. The plugin can reach only the projects your account can reach, it asks before changes such as rejecting content or blocking an author, and every change it makes is visible in the Moderation API dashboard.\n\nRequires a Moderation API account.",
     "developerName": "Moderation API",
     "category": "Developer Tools",
     "capabilities": [

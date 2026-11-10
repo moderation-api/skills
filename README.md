@@ -21,7 +21,7 @@ The plugin includes the skills and the [Moderation API MCP server](https://mcp.m
 
 ### Codex and ChatGPT
 
-Install the Moderation API plugin from the plugin directory. It includes the skills and the MCP server. In ChatGPT, the MCP server lets you run moderation from the chat; the setup skill needs a codebase, so use it in Codex.
+Install the [Moderation API plugin](https://chatgpt.com/plugins/plugin_asdk_app_6af1a0764cfc8191947efb344ca5e5d9) from the plugin directory. It includes the skills and the MCP server. In ChatGPT, the MCP server lets you run moderation from the chat; the setup skill needs a codebase, so use it in Codex.
 
 ## Skills
 

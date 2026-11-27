@@ -163,6 +163,14 @@ Then set up what the plan agreed:
 - **Wordlists**: create one with the wordlist commands, then turn it on for
   the channel:
   `modapi channels wordlists update <channel-id> --wordlists '[{"wordlistId":"<id>","enabled":true,"type":"BLOCK_LIST"}]' -o json`.
+- **Rules**: rules turn policy results into `allow`, `review` or `reject`.
+  List what a condition can read with
+  `modapi rules fields <channel-id> -o json`, try a rule on recent traffic
+  with `modapi rules simulate <channel-id> --rules '[...]' -o json`, then add
+  it:
+  `modapi rules create <channel-id> --name "Reject severe toxicity" --conditions '[[{"field":"policy.toxicity.score","operator":"gte","value":0.9}]]' --action reject -o json`.
+  Scores are 0 to 1. `modapi rules update <rule-id> --enabled=false` turns a
+  rule off and keeps it.
 
 ## 4. Add the moderation call
 
@@ -338,6 +346,8 @@ the MCP server. Give two or three examples that fit their app, for example:
   policy."
 - "Turn off profanity on the comments channel and add a guideline that flags
   sales pitches."
+- "Reject comments with a toxicity score above 90%, but first check how many
+  last week's comments that would reject."
 - "How did moderation go this month?"
 
 If tools named like `queue-items-list` or `channels-update` are already

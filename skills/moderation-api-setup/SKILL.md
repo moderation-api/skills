@@ -149,6 +149,20 @@ Then set up what the plan agreed:
 - **Shadow mode**: `modapi projects update <id> --global-flagging-mode DRY_RUN`
   for the whole project, or `modapi channels update <id> --flagging-mode DRY_RUN`
   for one channel.
+- **Policies**: `init --new` suggests policies from the brief. To change a
+  channel's policies, first list them:
+  `modapi channels policies retrieve <channel-id> -o json`. Each policy has a
+  `key`, `enabled` (the channel runs it), `flag` (its result can flag; false
+  only scores) and `available` (the plan and channel allow it). Change only
+  the ones you send:
+  `modapi channels policies update <channel-id> --policies '[{"key":"spam","enabled":true},{"key":"profanity","enabled":false}]' -o json`.
+- **Guidelines**: a rule the policies do not cover, in plain words, for
+  example "no sales pitches". An AI model checks each message against it:
+  `modapi channels guidelines update <channel-id> --guidelines '[{"key":"sales_pitch","enabled":true,"instructions":"Flag messages that try to sell a product or service."}]' -o json`.
+  `enabled: false` deletes a guideline.
+- **Wordlists**: create one with the wordlist commands, then turn it on for
+  the channel:
+  `modapi channels wordlists update <channel-id> --wordlists '[{"wordlistId":"<id>","enabled":true,"type":"BLOCK_LIST"}]' -o json`.
 
 ## 4. Add the moderation call
 
@@ -322,6 +336,8 @@ the MCP server. Give two or three examples that fit their app, for example:
   pattern."
 - "These comments were flagged but are fine, and these got through. Fix the
   policy."
+- "Turn off profanity on the comments channel and add a guideline that flags
+  sales pitches."
 - "How did moderation go this month?"
 
 If tools named like `queue-items-list` or `channels-update` are already

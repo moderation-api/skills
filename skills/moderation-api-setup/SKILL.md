@@ -170,6 +170,10 @@ Send with every call:
   AI the context of the conversation.
 - `metadata`: optional small facts that help reviewers.
 
+Do not set `doNotStore` unless the user asks, also not for tests. Users check
+the dashboard to see what was sent, and with `doNotStore` the item's content
+is empty.
+
 **Content not saved yet.** Choose one way per entry point:
 
 - Moderate first (recommended when `reject` must stop the content): leave out
